@@ -1,1 +1,0 @@
-This folder contains saved gesture data.
