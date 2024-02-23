@@ -28,27 +28,41 @@ public class TestRecognizer {
        }
    }
 
-   /**
-    * Tests that points are resampled correctly
-    */
-   @Test
-   public void testResample(){
+    /**
+     * Tests that points are resampled correctly
+     * Edited by Lucy Manalang on 2/22/2024
+     */
+    @Test
+    public void testResample(){
+        int n = 10;
+        Deque<Point> resampled = recognizer.resamplePoints(originalPoints, n);
+        assertEquals(n, resampled.size()); // resampling should return the correct number of points
 
-       int n = 10;
-       Deque<Point> resampled = recognizer.resamplePoints(originalPoints, n);
-       assertEquals(n, resampled.size()); // resampling should return the correct number of points
+        double interval = (ORIGINAL_N-1.0)/(n-1.0); //Path length is 19, so interval should be 19/(n-1) with n=10;
 
-       double interval = (ORIGINAL_N-1.0)/(n-1.0); //Path length is 19, so interval should be 19/(n-1) with n=10;
+        Iterator<Point> it = resampled.iterator();
+        double i=0;
+        while (it.hasNext()){ //this test is a simple test that will not catch all errors,
+            Point point = it.next(); // it is just here to make debugging easier
+            assertEquals(i, point.getX(), 0.01);
+            assertEquals(0, point.getY(), 0.01);
+            i+=interval;
+        }
 
-       Iterator<Point> it = resampled.iterator();
-       double i=0;
-       while (it.hasNext()){
-           Point point = it.next();
-           assertEquals(i, point.getX(), 0.01);
-           assertEquals(0, point.getY(), 0.01);
-           i+=interval;
-       }
-   }
+        IOManager ioManager = new IOManager();
+        Deque<Point> resampledCircle = ioManager.loadGesture("resampledCircle.xml");
+        Deque<Point> circleTemplate = ioManager.loadGesture("circleTemplate.xml");
+        resampled = recognizer.resamplePoints(circleTemplate, 64);
+
+        Iterator<Point> resampleIterator = resampledCircle.iterator();
+        Iterator<Point> circleIterator = resampled.iterator();
+        while (circleIterator.hasNext()){
+            Point point1 = circleIterator.next();
+            Point point2 = resampleIterator.next();
+            assertEquals(point1.getX(), point2.getX(), 0.01);
+            assertEquals(point1.getY(), point2.getY(), 0.01);
+        }
+    }
 
    /**
     * Tests the path length.
